@@ -3,6 +3,7 @@ import cors from "cors";
 import multer from "multer";
 import fs from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { authenticateToken, registerUser, loginUser, getUserInfo } from "./auth.js";
 import "dotenv/config";
 
 const app = express();
@@ -13,7 +14,12 @@ app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
-app.post("/analyze-food", upload.single("image"), async (req, res) => {
+// Rutas de autenticación
+app.post("/register", registerUser);
+app.post("/login", loginUser);
+app.get("/user", authenticateToken, getUserInfo);
+
+app.post("/analyze-food", authenticateToken, upload.single("image"), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: "No se recibió la imagen" });
