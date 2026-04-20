@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import fs from "fs";
-import { TextGenerationModel } from "@google-ai/generative";
+import { TextGenerationModel } from "@google/generative-ai";
 import "dotenv/config";
 
 const app = express();
