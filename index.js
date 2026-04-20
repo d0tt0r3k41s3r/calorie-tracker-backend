@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import fs from "fs";
-import { TextGenerationModel } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import "dotenv/config";
 
 const app = express();
@@ -11,9 +11,7 @@ const upload = multer ({dest: "uploads/"});
 app.use(cors());
 app.use(express.json());
 
-const gemini = new TextGenerationModel({
-    apiKey: process.env.GOOGLE_API_KEY
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 app.post("/analyze-food", upload.single("image"), async (req, res) => {
     try {
@@ -24,6 +22,7 @@ app.post("/analyze-food", upload.single("image"), async (req, res) => {
         const imageBuffer = fs.readFileSync(req.file.path);
         const description = req.body.description || "";
         const imageBase64 = imageBuffer.toString("base64");
+        const mimeType = req.file.mimetype || "image/jpeg"; // Asumir jpeg si no se especifica
 
         const prompt = `
 Eres nutricionista deportivo.
@@ -33,7 +32,6 @@ Ten en cuenta aceites invisibles.
 Devuelve SOLO JSON valido.
 
 Description: ${description}
-Imagen base64: ${imageBase64}
 
 Devuelve exactamente:
 {
@@ -45,13 +43,20 @@ Devuelve exactamente:
 }
 `;
 
-        const response = await gemini.generate({
-            model: "gemini-1.5-mini",
-            prompt
-        });
-        
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent([
+            prompt,
+            {
+                inlineData: {
+                    mimeType: mimeType,
+                    data: imageBase64
+                }
+            }
+        ]);
+
         fs.unlinkSync(req.file.path);
-        const text = response?.text || "";
+        const response = await result.response;
+        const text = response.text();
         res.json(JSON.parse(text.trim()));
     } catch (err) {
         console.error(err);
