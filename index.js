@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const openai = new OpenAI({
-    apiKey: ProcessingInstruction.env.OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY
 });
 
 app.post("/analyze-food", upload.single("image"), async (req, res) => {
