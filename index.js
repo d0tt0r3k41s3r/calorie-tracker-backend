@@ -3,7 +3,7 @@ import cors from "cors";
 import multer from "multer";
 import fs from "fs";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { authenticateToken, registerUser, loginUser, getUserInfo } from "./auth.js";
+import { authenticateToken, registerUser, loginUser, getUserInfo, getUserData, updateUserData } from "./auth.js";
 import "dotenv/config";
 
 const app = express();
@@ -18,6 +18,8 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 app.post("/register", registerUser);
 app.post("/login", loginUser);
 app.get("/user", authenticateToken, getUserInfo);
+app.get("/user/data", authenticateToken, getUserData);
+app.put("/user/data", authenticateToken, updateUserData);
 
 app.post("/analyze-food", authenticateToken, upload.single("image"), async (req, res) => {
     try {

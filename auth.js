@@ -58,7 +58,9 @@ export async function registerUser(req, res) {
             id: users.length + 1,
             email,
             password: hashedPassword,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            entries: {},
+            weights: {}
         };
         
         users.push(newUser);
@@ -101,6 +103,49 @@ export async function loginUser(req, res) {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error en el login" });
+    }
+}
+
+// Obtener datos de usuario (entradas y pesos)
+export async function getUserData(req, res) {
+    try {
+        const users = loadUsers();
+        const user = users.find(u => u.id === req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+        
+        res.json({ entries: user.entries || {}, weights: user.weights || {} });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error obteniendo datos de usuario" });
+    }
+}
+
+// Actualizar datos de usuario (entradas y pesos)
+export async function updateUserData(req, res) {
+    try {
+        const { entries, weights } = req.body;
+        const users = loadUsers();
+        const user = users.find(u => u.id === req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+        
+        if (entries !== undefined) {
+            user.entries = entries;
+        }
+        if (weights !== undefined) {
+            user.weights = weights;
+        }
+        
+        saveUsers(users);
+        res.json({ entries: user.entries || {}, weights: user.weights || {} });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Error actualizando datos de usuario" });
     }
 }
 
