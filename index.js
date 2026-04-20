@@ -43,7 +43,7 @@ Devuelve exactamente:
 }
 `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro-latest" });
         const result = await model.generateContent([
             prompt,
             {
